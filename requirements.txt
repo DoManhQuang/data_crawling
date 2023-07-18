@@ -1,0 +1,6 @@
+pymongo
+numpy
+pandas
+tqdm
+Flask
+Flask-RESTful
