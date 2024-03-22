@@ -7,9 +7,8 @@ import os, sys
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))
-from source.database.mongodb import query_insert_many_data
-
+    sys.path.append(str(ROOT)) 
+from source.database.mongodb.query_mongodb import query_insert_many_data
 
 def get_statistics_by_city_category():
     url = "https://gappapi.deliverynow.vn/api/delivery/get_statistics_by_city_category"
@@ -245,11 +244,11 @@ def call_api_get_info_shop_use_deli_ids(collection_name="xxx", token="xxx"):
 
 
 if __name__ == "__main__":
-    # call_api_get_info_shop_use_deli_ids(collection_name="shopeefood_test_6_6", 
-    #                                     token="17fcb31a031f94c1ff5a79f8b3488d30e80e9b9f28c9730d4b6e2b58cc5d4b3d7585b37fc1a2d454b9f5890809d8dc0fe2289d953eca5f4bbdc0afb6b73b2d1e")
+    call_api_get_info_shop_use_deli_ids(collection_name="shopeefood_test_6_6", 
+                                        token="17fcb31a031f94c1ff5a79f8b3488d30e80e9b9f28c9730d4b6e2b58cc5d4b3d7585b37fc1a2d454b9f5890809d8dc0fe2289d953eca5f4bbdc0afb6b73b2d1e")
 
-    # call_api_get_info_shop_use_res_ids(collection_name="shopefood_6_6_t2",
-    #                                    token="17fcb31a031f94c1ff5a79f8b3488d30e80e9b9f28c9730d4b6e2b58cc5d4b3d7585b37fc1a2d454b9f5890809d8dc0fe2289d953eca5f4bbdc0afb6b73b2d1e")
+    call_api_get_info_shop_use_res_ids(collection_name="shopefood_6_6_t2",
+                                       token="17fcb31a031f94c1ff5a79f8b3488d30e80e9b9f28c9730d4b6e2b58cc5d4b3d7585b37fc1a2d454b9f5890809d8dc0fe2289d953eca5f4bbdc0afb6b73b2d1e")
     # print(get_browsing_delivery_ids(city_id=272))
 
     # print(get_detail_delivery(request_id=175065))

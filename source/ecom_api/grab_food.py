@@ -11,7 +11,7 @@ import time
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
-from source.database.mongodb import query_insert_many_data
+from source.database.mongodb.query_mongodb import query_insert_many_data
 
 def get_recapcha():
     output = os.popen("bash grabfood_recapcha.sh").read()
@@ -277,8 +277,8 @@ def test_api(collection_shop="location", path="location_level_3.csv"):
 
     
 if __name__ == "__main__":
-    # call_api_grab_food(collection_shop="grabfood_shop_030723", collection_menu="grabfood_menu_030723", 
-    #                    path="/data/quangdm/ecom/crawler_go_ecom/city_data/location_level_3.csv")
+    call_api_grab_food(collection_shop="grabfood_shop_030723", collection_menu="grabfood_menu_030723", 
+                       path="/data/quangdm/ecom/crawler_go_ecom/city_data/location_level_3.csv")
 
     test_api(collection_shop="location_1",path="/data/quangdm/ecom/crawler_go_ecom/city_data/location_level_3.csv")
     pass
