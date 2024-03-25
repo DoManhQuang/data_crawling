@@ -7,7 +7,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
-from source.database.mongodb import query_insert_many_data
+from source.database.mongodb.query_mongodb import query_insert_many_data
 
 
 def get_data_configs_cities():
