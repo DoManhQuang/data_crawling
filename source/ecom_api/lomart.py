@@ -81,6 +81,8 @@ def get_full_menu_shop(slug="hoa-qua-sach-dong-thom-quan-cau-giay-ha-noi-1639800
 def call_api_get_info_shop(collection_name):
     cities = get_data_configs_cities()
     for city in cities:
+        if city["city"]["id"] == 50:
+            continue
         print("City Id: ", city["city"]["id"], " - City Name: ", city["city"]["name"])
         try:
             categories = get_categories(cityId=city["city"]["id"])
@@ -96,6 +98,7 @@ def call_api_get_info_shop(collection_name):
                     pages = int(pagination["total"]/pagination["limit"]) + 1
                     for page in tqdm(range(1, pages + 1)):
                         try:
+                            
                             my_list_shop = get_info_basic_shop(cityId=city["city"]["id"], limit=24, page=page, categories=cate["id"])
                             # my_list_tmp = []
                             # cnt_shop = 0
@@ -131,6 +134,8 @@ def call_api_get_info_shop(collection_name):
                                     print("status: ", status)
                                     print("INSERT MONGODB ERROR!!")
                                     print("DATA : ", my_list_shop)
+                                else:
+                                    print("INNSERT PASS")
                             else:
                                 print("data shop not exists!")
 
@@ -144,6 +149,9 @@ def call_api_get_info_shop(collection_name):
 
 if __name__ == "__main__":
     call_api_get_info_shop("lomart_shop_v2")
+    # cities = get_data_configs_cities()
+    # for city in cities:
+    #     print("City Id: ", city["city"]["id"], " - City Name: ", city["city"]["name"])
     pass
 
 

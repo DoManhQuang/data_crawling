@@ -7,7 +7,7 @@ def get_database():
     try:
         client = MongoClient(CONNECTION_STRING)
         # Create the database for our example (we will use the same database throughout the tutorial
-        return client['crawl_data_test3']
+        return client['DATN']
     except:
         return -1
 

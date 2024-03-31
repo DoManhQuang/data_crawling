@@ -254,30 +254,31 @@ def info_basic(city, limit_value = 5, page_value = 0):
         
     return responses
 
-def count_shopee(location_url:str = ""):
+def count_shopee(city_id:str = ""):
     mycol = dbname[shopee_food_db]
     count = 0
-    url_local = {}
-    
-    if not location_url.isspace():
-        url_local = {"location_url": location_url}
-        
-    count = mycol.count_documents(url_local)
+    id_city = {}
+    if not city_id.isspace():
+        id_city = {"city_id": int(city_id)}
+    print("id city: ", id_city)    
+    count = mycol.count_documents(id_city)
+    print(id_city)
     return count
 
-def count_lomart(category: str = ""):
+def count_lomart(city_id: str = ""):
     mycol = dbname[lormart]
     count = 0
-    name_category = {}
-    
-    if not category.isspace():
-        name_category = {"category_info.slug": category}
-    
-    count = mycol.count_documents(name_category)
+    id_city = {}
+    print("city id: ", city_id)
+    if not city_id.isspace():
+        id_city = {"info_shop.cityId": int(city_id)}
+    print("id_city ", id_city)
+    count = mycol.count_documents(id_city)
+    print(id_city)
     return count
     
 
 if __name__ == "__main__":   
     # code here
-     
+    count_shopee(274)
     pass
