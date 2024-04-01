@@ -20,7 +20,7 @@ def ping():
     return{
         "hello": "world"
     }
-
+# Tốp 5 quán ăn có rating cao nhất
 @app.get("/top5-rating/{location_url}/{k}")
 async def tbl_rating(location_url: str, k: int):
     responses = query_mongodb.top_k_rating(location_url=location_url, k=k)
@@ -39,7 +39,7 @@ async def tbl_info(city : str):
 async def tbl_api(location_url: str = Query(default= "", alias= "location")):
     responses = query_mongodb.call_api(location_url = location_url)
     return responses
-
+# Số lượng quán ăn trong shopee theo id của thành phố của shopeefood
 @app.get("/get-quantity-shopee") 
 def count_shopee_food(cityId: str = ""):
     responses = query_mongodb.count_shopee(city_id= cityId)
@@ -47,7 +47,7 @@ def count_shopee_food(cityId: str = ""):
     return {
         "quantity": responses
     }
-
+# Số lượng quán ăn theo id của thành phố của lomart
 @app.get("/get-quantity-lomart") 
 def count_lomarts(city_id: str = ""):
     responses = query_mongodb.count_lomart(city_id= city_id)
@@ -55,8 +55,8 @@ def count_lomarts(city_id: str = ""):
     return {
         "quantity": responses
     }
-
-@app.get("/get-quantity-city-lomart") 
+# Liệt kê danh sách từng thành phố có bao nhiêu quán ăn trong lomart
+@app.get("/get-quantity-shop-city-lomart") 
 def count_city_lomart():
     data={}
     cities = lomart.get_data_configs_cities()
@@ -67,8 +67,10 @@ def count_city_lomart():
     return {
         "quantity": data
     }
+
+# Liệt kê danh sách từng thành phố có bao nhiêu quán ăn trong shopeefood
     
-@app.get("/get-quantity-city-shopeefood") 
+@app.get("/get-quantity-shop-city-shopeefood") 
 def count_city_shopeefood():
     data={}
     flag, status_city, cities = get_statistics_by_city_category()
@@ -84,7 +86,17 @@ def count_city_shopeefood():
         "quantity": data
     }
     
+# Liệt kê số lượng quán ăn theo danh mục sản phẩm trong 1 thành phố
+# Lomart
 
+@app.get("/get-quantity-categories-city-lomart")
+def count_shop_by_categories_lomart(cityId : int="",cateId:int=""):
+    responses = query_mongodb.count_shop_by_categorie_lomart(cityId= cityId,cateId=cateId)
+    
+    return {
+        "quantity": responses
+    }
+# Hệ thống crawl dữ liệu theo thời gian
 @app.get("/monitor-crawler-system") 
 def monitor_crawler(collec_name, total_minute=60, step=5):
     ts_present=datetime.timestamp(datetime.now())
@@ -105,7 +117,7 @@ def monitor_crawler(collec_name, total_minute=60, step=5):
 # def welcome():
 #     print("Web api is running on port 8000: http://127.0.0.1:8000")
     
-# if __name__ == "__main__":   
-#     # code here    
-#     print("Web api start.")
-#     pass
+if __name__ == "__main__":   
+    # code here    
+    count_shop_by_categories_lomart
+    pass

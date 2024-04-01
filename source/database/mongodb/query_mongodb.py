@@ -276,9 +276,34 @@ def count_lomart(city_id: str = ""):
     count = mycol.count_documents(id_city)
     print(id_city)
     return count
-    
+
+def count_shop_by_categorie_lomart(cityId:str="", cateId:str=""):
+    mycol = dbname[lormart]
+    document_count = 0
+    query = {}
+    if cateId != "":
+        query["category_info.id"] = cateId
+        print(cateId)
+    if cityId != "":
+        query["info_shop.cityId"] = cityId
+        print(cityId)
+    document_count = mycol.count_documents(query)
+    return document_count   
+
+def count_shop_by_categorie_shopee(cityId:str="", cateId:str=""):
+    mycol = dbname[lormart]
+    document_count = 0
+    query = {}
+    if cateId != "":
+        query["category_info.id"] = cateId
+        print(cateId)
+    if cityId != "":
+        query["info_shop.cityId"] = cityId
+        print(cityId)
+    document_count = mycol.count_documents(query)
+    return document_count 
 
 if __name__ == "__main__":   
     # code here
-    count_shopee(274)
+    count_shop_by_categorie_lomart(1,1086)
     pass
