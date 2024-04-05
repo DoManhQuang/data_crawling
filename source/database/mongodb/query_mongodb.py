@@ -305,25 +305,26 @@ def count_shop_by_categorie_shopee(cityId:str="", cate:str=""):
 
 # Liệt kê rating theo danh mục sản phẩm trong thành phố của shopee
 
-def list_rating_by_categories_in_city(cityId:str="", cateId:str="", rating:str=""):
+def list_rating_by_categories_in_city(cityId:str="", cateId:str="",k=5):
     mycol = dbname[shopee_food_db]
-    
+    sort_rating ={"rating.avg": -1}
     query = {}
     if cateId != "":
         query["categories"] = cateId
     if cityId != "":
         query["city_id"] =  257
-    if rating != "":
-        query["rating.avg"] = 4.6
 
-    output_info = mycol.find(query)
+    output_info = mycol.find(query).sort(sort_rating)
     output_info = list(output_info)
     # responses=[]
     # responses.append(output_info)
     # return output_info
     responses = []
+    i = 0
     # Duyệt mảng lấy được từ db
     for product in output_info:
+        i += 1
+        print (product)
         # Với mỗi dữ liệu lấy được, thêm vào biến responses dưới dạng json
         responses.append( {
             "id" : str(product["_id"]), 
@@ -335,9 +336,43 @@ def list_rating_by_categories_in_city(cityId:str="", cateId:str="", rating:str="
             "name" : str(product["name"]),
             "phones" : str(product["phones"])
             })
+        if i == k:
+            break
     return responses
 
 # - API liệt kê số lượt quan tâm theo danh mục sản phẩm trong thành phố (shopeefood)
+def sum_total_review_by_categories_in_city(cityId:str="", cateId:str="",):
+    
+    mycol = dbname[shopee_food_db]
+    query = {}
+    if cateId != "":
+        query["categories"] = cateId
+    if cityId != "":
+        query["city_id"] =  257
+    # output_info = mycol.find(query,{})
+    # return output_info
+    pineline = [
+        {
+            "$match": {
+                "$and":[
+                    {"city_id":cityId},
+                    {"categories":cateId}
+                ]                
+            }
+        },
+        {
+            "$group":{
+                "_id":None,
+                "total":{
+                    "$sum":"$rating.total_review"
+                }
+            }
+        }
+    ]
+    result = mycol.aggregate(pineline)
+    total = next(result)["total"]
+    print("SUM: ", total)
+    return total
 
 if __name__ == "__main__":   
     # code here
