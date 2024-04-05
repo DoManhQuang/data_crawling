@@ -96,6 +96,25 @@ def count_shop_by_categories_lomart(cityId : int="",cateId:int=""):
     return {
         "quantity": responses
     }
+ 
+# Shoppe
+
+@app.get("/get-quantity-categories-city-shopee")
+def count_shop_by_categories_shopee(cityId : int="",cate:str=""):
+    responses = query_mongodb.count_shop_by_categorie_shopee(cityId= cityId,cate=cate)
+    
+    return {
+        "quantity": responses
+    }   
+# Liệt kê rating theo danh mục sản phẩm trong thành phố của shopee
+@app.get("/get-list-shop-by-categories-city-shopee")
+def list_shop_by_categories_shopee(cityId : str="",cate:str="",rating:str=""):
+    responses = query_mongodb.list_rating_by_categories_in_city(cityId=cityId, cateId=cate,rating=rating)
+    
+    return {
+        "quantity": responses
+    }
+
 # Hệ thống crawl dữ liệu theo thời gian
 @app.get("/monitor-crawler-system") 
 def monitor_crawler(collec_name, total_minute=60, step=5):

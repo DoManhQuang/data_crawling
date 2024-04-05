@@ -290,20 +290,56 @@ def count_shop_by_categorie_lomart(cityId:str="", cateId:str=""):
     document_count = mycol.count_documents(query)
     return document_count   
 
-def count_shop_by_categorie_shopee(cityId:str="", cateId:str=""):
-    mycol = dbname[lormart]
+def count_shop_by_categorie_shopee(cityId:str="", cate:str=""):
+    mycol = dbname[shopee_food_db]
     document_count = 0
     query = {}
-    if cateId != "":
-        query["category_info.id"] = cateId
-        print(cateId)
+    if cate != "":
+        query["categories"] = cate
+        print(cate)
     if cityId != "":
-        query["info_shop.cityId"] = cityId
+        query["city_id"] = cityId
         print(cityId)
     document_count = mycol.count_documents(query)
     return document_count 
 
+# Liệt kê rating theo danh mục sản phẩm trong thành phố của shopee
+
+def list_rating_by_categories_in_city(cityId:str="", cateId:str="", rating:str=""):
+    mycol = dbname[shopee_food_db]
+    
+    query = {}
+    if cateId != "":
+        query["categories"] = cateId
+    if cityId != "":
+        query["city_id"] =  257
+    if rating != "":
+        query["rating.avg"] = 4.6
+
+    output_info = mycol.find(query)
+    output_info = list(output_info)
+    # responses=[]
+    # responses.append(output_info)
+    # return output_info
+    responses = []
+    # Duyệt mảng lấy được từ db
+    for product in output_info:
+        # Với mỗi dữ liệu lấy được, thêm vào biến responses dưới dạng json
+        responses.append( {
+            "id" : str(product["_id"]), 
+            "address": str(product['address']),
+            "image_name" : str(product['image_name']),
+            "rating" : str(product["rating"]["avg"]),
+            "local" : str(product["location_url"]),
+            "url" : str(product["url"]),
+            "name" : str(product["name"]),
+            "phones" : str(product["phones"])
+            })
+    return responses
+
+# - API liệt kê số lượt quan tâm theo danh mục sản phẩm trong thành phố (shopeefood)
+
 if __name__ == "__main__":   
     # code here
-    count_shop_by_categorie_lomart(1,1086)
+    # count_shop_by_categorie_lomart(1,1086)
     pass
