@@ -5,6 +5,9 @@ from tqdm import tqdm
 import numpy as np
 import os, sys
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import concurrent.futures
+import threading
+import time
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT)) 
@@ -41,12 +44,52 @@ def get_statistics_by_city_category():
     response = requests.request("GET", url, headers=headers, data=payload)
     data_citi_ids = []
     json_object = json.loads(response.text)
-    if json_object["result"] == "success":
-        for city in json_object["reply"]["cities"]:
-            data_citi_ids.append(city["city_id"])
-    return json_object["result"], data_citi_ids
+    # print(list(json_object))
+    if "result" in list(json_object):
+        if json_object["result"] == "success":
+            for city in json_object["reply"]["cities"]:
+                data_citi_ids.append(city["city_id"])
+        return True, json_object["result"], data_citi_ids
+    return False, None, None
 
+ 
+def get_metadata():
+    url = "https://gappapi.deliverynow.vn/api/meta/get_metadata"
+    payload ={}
+    headers = {
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'vi,en-US;q=0.9,en;q=0.8',
+        'origin': 'https://shopeefood.vn',
+        'referer': 'https://shopeefood.vn/',
+        'sec-ch-ua': '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+        'sec-ch-ua-mobile': '?0', 
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'cross-site',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
 
+        'x-foody-access-token':'',
+        'x-foody-api-version': '1',
+        'x-foody-app-type': '1004',
+        'x-foody-client-id':'',
+        'x-foody-client-language': 'vi',
+        'x-foody-client-type':'1',
+        'x-foody-client-version': '3.0.0'
+
+    }
+    response = requests.request("GET",url,headers=headers,data=payload)
+    data_citi_ids = []
+    json_object = json.loads(response.text)
+    if "result" in list(json_object):
+        if json_object["result"] == "success":
+            for country in json_object["reply"]["country"]:
+                data_citi_ids.extend(country["cities"])
+                for city in  country["cities"]:
+                    data_citi_ids.append(city["id"])
+                    data_citi_ids.append(city["name"])
+        return True, json_object["result"], data_citi_ids
+    return False, None, None
 def get_list_res_ids_search_global(city_id=273, token="xxx", foody_services=[5]):
     url = "https://gappapi.deliverynow.vn/api/delivery/search_global"
     payload = json.dumps({
@@ -172,33 +215,48 @@ def get_detail_delivery(request_id=15400, token="xxx"):
     return json_object["result"], []
 
 
-def call_api_get_info_shop_use_res_ids(collection_name="xxx", token="xxx"):
-    status_city, cities = get_statistics_by_city_category()
+def call_api_get_info_shop_use_res_ids(collection_name="xxx", token="xxx", max_workers=5):
+    # flag, status_city, cities = get_statistics_by_city_category()
+    # if not flag:
+    #     print("Call API get_statistics_by_city_category => Fail")
+    #     return
+    # if status_city == "success":
+    #     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+    #         futures = []
+    #         for city_idx in tqdm(range(len(cities))):
+    #             # city_id = cities[city_idx]
+    #             future = executor.submit(process_city, collection_name, token,city_id=cities[city_idx])
+    #             futures.append(future)
+    #         for future in concurrent.futures.as_completed(futures):
+    #             try:
+    #                 print(future.result())
+    #             except Exception as err:
+    #                 print(f"ERROR CALL API : Unexpected {err=}, {type(err)=} - args: {err.args}")
+                    
+    # else:
+    #     print("ERROR CALL API status city : ", status_city)
+    #     print("city id: ", cities[city_idx])
+    
+    flag, status_city, cities = get_metadata()
+    if not flag:
+        print("Call API get_statistics_by_city_category => Fail")
+        return
     if status_city == "success":
-        for city_idx in tqdm(range(0, len(cities))):
-            try:
-                status_res_ids, list_res_ids = get_list_res_ids_search_global(city_id=cities[city_idx], token=token)
-                if status_res_ids == "success":
-                    for res_ids in list_res_ids:
-                        status_shop, my_list_shop = get_info_basic_shops(restaurant_ids=res_ids, token=token)
-                        if status_shop == "success":
-                            status = query_insert_many_data(collection_name=collection_name, mylist=my_list_shop)
-                            if status["status"] == 0:
-                                print("status : ", status)
-                                print("INSERT MONGODB ERROR!!")
-                                print("DATA : ", my_list_shop)
-                            else:
-                                print("INSERT MONGODB PASS!!")
-                        else:
-                            print("ERROR CALL API status_shop : ", status_shop)
-                else:
-                    print("ERROR CALL API status_res_ids : ", status_res_ids)
-            except Exception as err:
-                print(f"ERROR CALL API : Unexpected {err=}, {type(err)=} - args: {err.args}")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = []
+            for city_idx in tqdm(range(len(cities))):
+                # city_id = cities[city_idx]
+                future = executor.submit(process_city, collection_name, token,city_id=cities[city_idx])
+                futures.append(future)
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    print(future.result())
+                except Exception as err:
+                    print(f"ERROR CALL API : Unexpected {err=}, {type(err)=} - args: {err.args}")
+                    
     else:
         print("ERROR CALL API status city : ", status_city)
         print("city id: ", cities[city_idx])
-
 
 def call_api_get_info_shop_use_deli_ids(collection_name="xxx", token="xxx"):
     status_city, cities = get_statistics_by_city_category()
@@ -241,14 +299,32 @@ def call_api_get_info_shop_use_deli_ids(collection_name="xxx", token="xxx"):
         print("ERROR CALL API status city : ", status_city)
         print("city id: ", cities[city_idx])
 
+def process_city(collection_name, token,city_id):
+    status_res_ids, list_res_ids = get_list_res_ids_search_global(city_id=city_id, token=token)
+    if status_res_ids == "success":
+        for res_ids in list_res_ids:
+            status_shop, my_list_shop = get_info_basic_shops(restaurant_ids=res_ids, token=token)
+            if status_shop == "success":
+                status = query_insert_many_data(collection_name=collection_name, mylist=my_list_shop)
+                if status["status"] == 0:
+                    print("status : ", status)
+                    print("INSERT MONGODB ERROR!!")
+                    # print("DATA : ", my_list_shop)
+                else:
+                    print("INSERT MONGODB PASS!!")
+            else:
+                print("ERROR CALL API status_shop : ", status_shop)
+    else:
+        print("ERROR CALL API status_res_ids : ", status_res_ids)
 
-
+    
 if __name__ == "__main__":
-    call_api_get_info_shop_use_deli_ids(collection_name="shopeefood_test_6_6", 
-                                        token="17fcb31a031f94c1ff5a79f8b3488d30e80e9b9f28c9730d4b6e2b58cc5d4b3d7585b37fc1a2d454b9f5890809d8dc0fe2289d953eca5f4bbdc0afb6b73b2d1e")
+    # call_api_get_info_shop_use_deli_ids(collection_name="shopeefood_test_6_6", 
+    #                                     token="17fcb31a031f94c1ff5a79f8b3488d30e80e9b9f28c9730d4b6e2b58cc5d4b3d7585b37fc1a2d454b9f5890809d8dc0fe2289d953eca5f4bbdc0afb6b73b2d1e")
 
     call_api_get_info_shop_use_res_ids(collection_name="shopefood_6_6_t2",
-                                       token="17fcb31a031f94c1ff5a79f8b3488d30e80e9b9f28c9730d4b6e2b58cc5d4b3d7585b37fc1a2d454b9f5890809d8dc0fe2289d953eca5f4bbdc0afb6b73b2d1e")
+                                       token="17fcb31a031f94c1ff5a79f8b3488d30e80e9b9f28c9730d4b6e2b58cc5d4b3d7585b37fc1a2d454b9f5890809d8dc0fe2289d953eca5f4bbdc0afb6b73b2d1e",
+                                       max_workers=5)
     # print(get_browsing_delivery_ids(city_id=272))
 
     # print(get_detail_delivery(request_id=175065))

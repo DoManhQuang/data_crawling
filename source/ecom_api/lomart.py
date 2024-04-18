@@ -81,6 +81,8 @@ def get_full_menu_shop(slug="hoa-qua-sach-dong-thom-quan-cau-giay-ha-noi-1639800
 def call_api_get_info_shop(collection_name):
     cities = get_data_configs_cities()
     for city in cities:
+        if city["city"]["id"] == 50:
+            continue
         print("City Id: ", city["city"]["id"], " - City Name: ", city["city"]["name"])
         try:
             categories = get_categories(cityId=city["city"]["id"])
