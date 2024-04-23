@@ -267,7 +267,6 @@ def count_shopee(city_id:str = ""):
     print(id_city)
     return count
 
-
 def count_lomart(city_id: str = ""):
     mycol = dbname[lormart]
     count = 0
@@ -280,30 +279,38 @@ def count_lomart(city_id: str = ""):
     print(id_city)
     return count
 
+def count_category_lomart(cate: str = ""):
+    mycol = dbname[lormart]
+    count = 0
+    name_cate = {}
+    
+    if not cate.isspace():
+        name_cate = {"info_shop.cityId": int(cate)}
+    count = mycol.count_documents(cate)
+    print(name_cate)
+    return count
 
-def count_shop_by_categorie_lomart(cityId:str="", cateId:str=""):
+def count_shop_by_categorie_lomart(CityId:str="", cateId:str="" ):
     mycol = dbname[lormart]
     document_count = 0
     query = {}
     if cateId != "":
-        query["category_info.id"] = cateId
-        print(cateId)
-    if cityId != "":
-        query["info_shop.cityId"] = cityId
-        print(cityId)
+        query["category_info.value"] = cateId
+    if CityId != "":
+        query["info_shop.cityId"] = CityId
     document_count = mycol.count_documents(query)
     return document_count  
 
 
-def count_shop_by_categorie_shopee(cityId:str="", cate:str=""):
+def count_shop_by_categorie_shopee(CityId:str="",cate:str=""):
     mycol = dbname[shopee_food_db]
     document_count = 0
     query = {}
     if cate != "":
         query["categories"] = cate
        
-    if cityId != "":
-        query["city_id"] = cityId
+    if CityId != "":
+        query["city_id"] = CityId
        
     document_count = mycol.count_documents(query)
     return document_count
@@ -350,37 +357,34 @@ def list_rating_by_categories_in_city(cityId:str="", cateId:str="",k=5):
 
 
 # - API liệt kê số lượt quan tâm theo danh mục sản phẩm trong thành phố (shopeefood)
-def sum_total_review_by_categories_in_city(cityId:str="", cateId:str="",):
-   
+
+def sum_total_review_by_categories_in_city(cityId: int = "",cateId:str=""):
     mycol = dbname[shopee_food_db]
     query = {}
+    if cityId != "":
+        query["city_id"] = cityId
     if cateId != "":
         query["categories"] = cateId
-    if cityId != "":
-        query["city_id"] =  257
-    # output_info = mycol.find(query,{})
-    # return output_info
     pipeline = [
         {
-            "$match":{"query":query}
+            "$match": query
         },
         {
-            "$group":{
-                "_id":"$categories",
+            "$group": {
+                "_id": {
+                    "categories":"$categories",
+                    "city_id":"$city_id"
+                },
                 "Total": { "$sum": "$rating.total_review" }
             }
         }
     ]
-    #
-    # mycol.aggregate(pipeline)
-    # total = next(result)["total"]
-    # print("SUM: ", total)
-   
-    return mycol.aggregate(pipeline)
-
+    
+    result = list(mycol.aggregate(pipeline))
+    print(result)
+    return result
     
 
 if __name__ == "__main__":   
     # code here
-     
     pass

@@ -52,44 +52,68 @@ def get_statistics_by_city_category():
         return True, json_object["result"], data_citi_ids
     return False, None, None
 
- 
-def get_metadata():
-    url = "https://gappapi.deliverynow.vn/api/meta/get_metadata"
-    payload ={}
-    headers = {
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'vi,en-US;q=0.9,en;q=0.8',
-        'origin': 'https://shopeefood.vn',
-        'referer': 'https://shopeefood.vn/',
-        'sec-ch-ua': '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-        'sec-ch-ua-mobile': '?0', 
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'cross-site',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+    # response = requests.request("GET", url, headers=headers, data=payload)
+    # data_citi_ids = []
+    # json_object = json.loads(response.text)
+    # # print(list(json_object))
+    # if "result" in list(json_object):
+    #     if json_object["result"] == "success":
+    #         for city in json_object["reply"]["cities"]:
+    #             status_city, city_info = get_metadata()
+    #             if status_city == "success":
+    #                 city["cities"] = city_info
+    #             data_citi_ids.append(city)
+    #     return True, json_object["result"], data_citi_ids
+    # return False, None, None
+    
+    # response = requests.request("GET", url, headers=headers, data=payload)
+    # json_object = json.loads(response.text)
+    # data_citi_ids = []
+    # if "result" in list(json_object):
+    #     if json_object["result"] == "success":
+    #         for city in json_object["reply"]["cities"]:
+    #             status_city, city_info = get_metadata()
+    #             if status_city == "success":
+    #                 city["cities"] = city_info
+    #             data_citi_ids.append(city)
+    #         return True, json_object["result"], data_citi_ids
+    # return False, None, None
+# def get_metadata():
+#     url = "https://gappapi.deliverynow.vn/api/meta/get_metadata"
+#     payload ={}
+#     headers = {
+#         'accept': 'application/json, text/plain, */*',
+#         'accept-language': 'vi,en-US;q=0.9,en;q=0.8',
+#         'origin': 'https://shopeefood.vn',
+#         'referer': 'https://shopeefood.vn/',
+#         'sec-ch-ua': '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+#         'sec-ch-ua-mobile': '?0', 
+#         'sec-ch-ua-platform': '"Windows"',
+#         'sec-fetch-dest': 'empty',
+#         'sec-fetch-mode': 'cors',
+#         'sec-fetch-site': 'cross-site',
+#         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
 
-        'x-foody-access-token':'',
-        'x-foody-api-version': '1',
-        'x-foody-app-type': '1004',
-        'x-foody-client-id':'',
-        'x-foody-client-language': 'vi',
-        'x-foody-client-type':'1',
-        'x-foody-client-version': '3.0.0'
+#         'x-foody-access-token':'',
+#         'x-foody-api-version': '1',
+#         'x-foody-app-type': '1004',
+#         'x-foody-client-id':'',
+#         'x-foody-client-language': 'vi',
+#         'x-foody-client-type':'1',
+#         'x-foody-client-version': '3.0.0'
 
-    }
-    response = requests.request("GET",url,headers=headers,data=payload)
-    data_citi_ids = []
-    json_object = json.loads(response.text)
-    if "result" in list(json_object):
-        if json_object["result"] == "success":
-            for country in json_object["reply"]["country"]:
-                data_citi_ids.extend(country["cities"])
-                for city in  country["cities"]:
-                    data_citi_ids.append(city["id"])
-                    data_citi_ids.append(city["name"])
-        return True, json_object["result"], data_citi_ids
-    return False, None, None
+#     }
+#     response = requests.request("GET", url, headers=headers, data=payload)
+#     json_object = json.loads(response.text)
+#     data_cities = []
+#     if json_object["result"] == "success":
+#         for city_name in json_object["reply"]["country"]:
+#             data_cities.append(city_name["cities"])
+#         return json_object["result"], json_object["reply"]["country"]
+#     return json_object["result"], data_cities
+    
+
+   
 def get_list_res_ids_search_global(city_id=273, token="xxx", foody_services=[5]):
     url = "https://gappapi.deliverynow.vn/api/delivery/search_global"
     payload = json.dumps({
@@ -216,28 +240,7 @@ def get_detail_delivery(request_id=15400, token="xxx"):
 
 
 def call_api_get_info_shop_use_res_ids(collection_name="xxx", token="xxx", max_workers=5):
-    # flag, status_city, cities = get_statistics_by_city_category()
-    # if not flag:
-    #     print("Call API get_statistics_by_city_category => Fail")
-    #     return
-    # if status_city == "success":
-    #     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-    #         futures = []
-    #         for city_idx in tqdm(range(len(cities))):
-    #             # city_id = cities[city_idx]
-    #             future = executor.submit(process_city, collection_name, token,city_id=cities[city_idx])
-    #             futures.append(future)
-    #         for future in concurrent.futures.as_completed(futures):
-    #             try:
-    #                 print(future.result())
-    #             except Exception as err:
-    #                 print(f"ERROR CALL API : Unexpected {err=}, {type(err)=} - args: {err.args}")
-                    
-    # else:
-    #     print("ERROR CALL API status city : ", status_city)
-    #     print("city id: ", cities[city_idx])
-    
-    flag, status_city, cities = get_metadata()
+    flag, status_city, cities = get_statistics_by_city_category()
     if not flag:
         print("Call API get_statistics_by_city_category => Fail")
         return
@@ -257,6 +260,7 @@ def call_api_get_info_shop_use_res_ids(collection_name="xxx", token="xxx", max_w
     else:
         print("ERROR CALL API status city : ", status_city)
         print("city id: ", cities[city_idx])
+    
 
 def call_api_get_info_shop_use_deli_ids(collection_name="xxx", token="xxx"):
     status_city, cities = get_statistics_by_city_category()
