@@ -9,7 +9,7 @@ from source.database.mongodb.mongodb import get_database
 
 dbname = get_database()
 shopee_food_db = "shopefood_6_6_t2"
-lormart = "lomart_shop_v2"
+lomart = "lomart_shop_v2"
 
 def query_insert_many_data(collection_name, mylist):
     result = dict()
@@ -291,11 +291,11 @@ def count_category_lomart(cate: str = ""):
     return count
 
 def count_shop_by_categorie_lomart(CityId:str="", cateId:str="" ):
-    mycol = dbname[lormart]
+    mycol = dbname[lomart]
     document_count = 0
     query = {}
     if cateId != "":
-        query["category_info.value"] = cateId
+        query["category_info.id"] = cateId
     if CityId != "":
         query["info_shop.cityId"] = CityId
     document_count = mycol.count_documents(query)
@@ -377,6 +377,10 @@ def sum_total_review_by_categories_in_city(cityId: int = "",cateId:str=""):
                 },
                 "Total": { "$sum": "$rating.total_review" }
             }
+
+        },
+        {
+            "$sort":{"Total": -1}
         }
     ]
     

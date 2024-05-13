@@ -79,14 +79,15 @@ def get_full_menu_shop(slug="hoa-qua-sach-dong-thom-quan-cau-giay-ha-noi-1639800
     return json_object["data"]
 
 
-def call_api_get_info_shop(collection_name,max_workers=5):
+def call_api_get_info_shop_use_threading(collection_name,max_workers=5):
     cities = get_data_configs_cities()
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = []
 
         for city in cities:
-            
+            if city["city"]["id"] == 50:
+                continue
             print("City Id: ", city["city"]["id"], " - City Name: ", city["city"]["name"])
             try:
                 categories = get_categories(cityId=city["city"]["id"])
@@ -143,9 +144,77 @@ def process_shop(collection_name, city, cate_info, page, cate):
 
     except Exception as err:
         print(f"ERROR CALL API get_info_basic_shop : Unexpected {err=}, {type(err)=} - args: {err.args}")
+def call_api_get_info_shop(collection_name):
+    cities = get_data_configs_cities()
+    for city in cities:
+        print("City Id: ", city["city"]["id"], " - City Name: ", city["city"]["name"])
+        try:
+            categories = get_categories(cityId=city["city"]["id"])
+            for cate in categories:
+                cate_info = {
+                    "id": cate["id"],
+                    "slug": cate["slug"],
+                    "value": cate["value"]
+                }
+                print("cate info: ", cate_info)
+                try:
+                    pagination = get_pagination_in_cityid(cityId=city["city"]["id"], categories=cate["id"])
+                    pages = int(pagination["total"]/pagination["limit"]) + 1
+                    for page in tqdm(range(1, pages + 1)):
+                        try:
+                            my_list_shop = get_info_basic_shop(cityId=city["city"]["id"], limit=24, page=page, categories=cate["id"])
+
+                            my_list_tmp = []
+                            cnt_shop = 0
+
+                            for my_shop in my_list_shop:
+                                try:
+                                    if my_shop["info_basic"]["username"] != '':
+                                        my_shop["info_shop"] = get_full_info_shop(username=my_shop["info_basic"]["username"]) # add info shop
+                                    
+                                    if my_shop["info_basic"]["slug"] != '':
+                                        my_shop["info_menu"] = get_full_menu_shop(slug=my_shop["info_basic"]["slug"]) # add menu shop
+                                    
+                                    my_shop["url_shop"] = "https://lomart.vn/" + my_shop["info_basic"]["username"] # add url shop
+                                    my_shop["category_info"] = cate_info # add cate info
+                                    my_shop["create_time"] = datetime.timestamp(datetime.now()) # add create
+
+                                    my_list_tmp.append(my_shop)
+                                    if cnt_shop == 100:
+                                        status = query_insert_many_data(collection_name=collection_name, mylist=my_list_tmp)
+                                        if status["status"] == 0:
+                                            print("status: ", status)
+                                            print("INSERT MONGODB ERROR!!")
+                                            print("DATA : ", my_list_tmp)
+                                        else:
+                                            my_list_tmp.clear()
+                                            cnt_shop = 0
+                                            print("init temp shop : ", my_list_tmp, cnt_shop)
+
+                                except:
+                                    print("ERROR CALL API info_shop, info_menu")
+                                    print("my_shop['info_basic'] : ", my_shop["info_basic"]["slug"], " - ", my_shop["info_basic"]["username"])
+
+                            if len(my_list_shop) > 0:
+                                status = query_insert_many_data(collection_name=collection_name, mylist=my_list_shop)
+                                if status["status"] == 0:
+                                    print("status: ", status)
+                                    print("INSERT MONGODB ERROR!!")
+                                    print("DATA : ", my_list_shop)
+                            else:
+                                print("data shop not exists!")
+
+                        except Exception as err:
+                            print(f"ERROR CALL API get_info_basic_shop : Unexpected {err=}, {type(err)=} - args: {err.args}")
+                except Exception as err:
+                    print(f"ERROR CALL API get_pagination_in_cityid : Unexpected {err=}, {type(err)=} - args: {err.args}")
+        except Exception as err:
+            print(f"ERROR CALL API get_categories : Unexpected {err=}, {type(err)=} - args: {err.args}")
+
 
 if __name__ == "__main__":
-    call_api_get_info_shop("lomart_shop_v2",8)
+    call_api_get_info_shop_use_threading("lomart_shop_v2",4)
+    # call_api_get_info_shop("lomart_shop_v1")
     pass
 
 

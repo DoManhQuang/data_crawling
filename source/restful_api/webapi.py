@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 import os, sys
 from datetime import datetime, timezone
 from tqdm import tqdm
+from collections import defaultdict
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
@@ -100,27 +101,36 @@ def count_city_shopeefood():
 # Số lượng quán ăn trong 1 thành phố theo danh mục
 @app.get("/get-quantity-categories-city-lomart")
 def count_shop_by_categories_lomart(idCity:str=""):
-    cate_name, cate_count = [], []
+    cate_dict = defaultdict(int)
     cities = lomart.get_data_configs_cities()
     for city in cities:
-        categories = lomart.get_categories(cityId=city["city"]["id"])
+        categories = lomart.get_categories(cityId=city["id"])
         for cate in categories:
             cate_info = {
                 "id": cate["id"],
                 "slug": cate["slug"],
                 "value": cate["value"]
             }
-            cate_name.append(cate_info["value"])
-            cate_count.append(query_mongodb.count_shop_by_categorie_lomart(CityId=idCity, cateId=cate["value"]))
-    
-    
+            cate_name = cate_info["value"]
+            cate_count = query_mongodb.count_shop_by_categorie_lomart(CityId=city["id"], cateId=cate["id"])
+            cate_dict[cate_name] += cate_count
+
+    cate_names = list(cate_dict.keys())
+    cate_counts = list(cate_dict.values())
+
     return {
         "quantity": {
-
-            'cate_names': cate_name,
-            'cate_counts': cate_count
+            'cate_names': cate_names,
+            'cate_counts': cate_counts
         }
     }
+# def count_shop_by_categories_lomart(cityId : int="",cateId:int=""):
+#     responses = query_mongodb.count_shop_by_categorie_lomart(CityId= cityId,cateId=cateId)
+    
+#     return {
+#         "quantity": responses
+#     }
+
 #  Danh sách số lượng quán ăn
 # Shoppe
 
