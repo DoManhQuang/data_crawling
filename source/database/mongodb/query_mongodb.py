@@ -225,7 +225,7 @@ def top_k_rating(location_url, k = 5):
     return responses
    
 def info_basic(city, limit_value = 5, page_value = 0):
-    mycol = dbname[lormart]
+    mycol = dbname[lomart]
     name_city = {"info_basic.address.city":city}
     # filter_name = {'info_basic.address.city': 'Hồ Chí Minh'}
     # info = {"info_basic" : info_basic}
@@ -268,7 +268,7 @@ def count_shopee(city_id:str = ""):
     return count
 
 def count_lomart(city_id: str = ""):
-    mycol = dbname[lormart]
+    mycol = dbname[lomart]
     count = 0
     id_city = {}
     print("city id: ", city_id)
@@ -280,7 +280,7 @@ def count_lomart(city_id: str = ""):
     return count
 
 def count_category_lomart(cate: str = ""):
-    mycol = dbname[lormart]
+    mycol = dbname[lomart]
     count = 0
     name_cate = {}
     
@@ -318,8 +318,52 @@ def count_shop_by_categorie_shopee(CityId:str="",cate:str=""):
 
 # Liệt kê rating theo danh mục sản phẩm trong thành phố của shopee
 
+#Lomadb.
+# getCollection('lomart_shop_v2')
+#   .find(
+#     {},
+#     {
+#       'info_shop.name': 1,
+#       'info_shop.address.full': 1,
+#       'info_shop.phoneNumber': 1,
+#       'info_shop.rating': 1
+#     }
+#   )
+#   .sort({ 'info_shop.rating': -1 });rt
 
-def list_rating_by_categories_in_city(cityId:str="", cateId:str="",k=5):
+# Lomart
+def list_rating_by_categories_of_lomart(cityId:int="", cateId:int="",k=5):
+    mycol = dbname[lomart]
+    sort_rating ={"info_shop.rating": -1}
+    query = {}
+    if cateId != "":
+        query["category_info.id"] = cateId
+    if cityId != "":
+        query["info_shop.cityId"] =  cityId
+
+
+    output_info = mycol.find(query).sort(sort_rating)
+    output_info = list(output_info)
+    responses = []
+    i = 0
+    # Duyệt mảng lấy được từ db
+    for product in output_info:
+        i += 1
+        print (product)
+        # Với mỗi dữ liệu lấy được, thêm vào biến responses dưới dạng json
+        responses.append( {
+            "address": str(product['info_shop']["address"]["full"]),
+            "rating" : str(product["info_shop"]["rating"]),
+            "name" : str(product["info_shop"]["name"]),
+            "phones" : str(product["info_shop"]["phoneNumber"])
+            })
+        if i == k:
+            break
+    return responses
+
+# Shopee
+
+def list_rating_by_categories_of_shopee(cityId:str="", cateId:str="",k=5):
     mycol = dbname[shopee_food_db]
     sort_rating ={"rating.avg": -1}
     query = {}
@@ -358,7 +402,7 @@ def list_rating_by_categories_in_city(cityId:str="", cateId:str="",k=5):
 
 # - API liệt kê số lượt quan tâm theo danh mục sản phẩm trong thành phố (shopeefood)
 
-def sum_total_review_by_categories_in_city(cityId: int = "",cateId:str=""):
+def sum_total_review_by_categories_in_city_shopee(cityId: int = "",cateId:str=""):
     mycol = dbname[shopee_food_db]
     query = {}
     if cityId != "":
@@ -371,11 +415,46 @@ def sum_total_review_by_categories_in_city(cityId: int = "",cateId:str=""):
         },
         {
             "$group": {
-                "_id": {
-                    "categories":"$categories",
-                    "city_id":"$city_id"
-                },
+                "_id": "$categories",
+                # {
+                #     "categories":"$categories"
+                #     # "city_id":"$city_id"
+                # },
                 "Total": { "$sum": "$rating.total_review" }
+            }
+
+        },
+        {
+            "$sort":{"Total": -1}
+        }
+    ]
+    
+    result = list(mycol.aggregate(pipeline))
+    print(result)
+    return result
+    
+
+
+def sum_total_review_by_categories_in_city_lomart(cityId: int = "",cateId:str=""):
+    mycol = dbname[lomart]
+    query = {}
+    if cateId != "":
+        query["category_info.value"] = cateId
+    if cityId != "":
+        query["info_shop.cityId"] =  cityId
+    pipeline = [
+        {
+            "$match": query
+        },
+        {
+            "$group": {
+                # "_id":"$category_info.value", 
+                "_id":"$category_info.value", 
+                # {
+                #     "categories":"$category_info.value"
+                #     # "city_id":"info_shop.cityId"
+                # },
+                "Total": { "$sum": "$info_shop.count.view" }
             }
 
         },

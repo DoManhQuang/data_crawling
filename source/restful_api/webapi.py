@@ -142,10 +142,19 @@ async def count_shop_by_categories_shopee(cityId : int="",cate:str=""):
     return {
         "quantity": responses
     }  
+# Liệt kê rating theo danh mục sản phẩm trong thành phố của lomart
+@app.get("/get-list-shop-by-categories-city-lomart/{cityId}/{cate}/{k}")
+def list_shop_by_categories_lomart(cityId : int="",cate:int="",k : int=""):
+    responses = query_mongodb.list_rating_by_categories_of_lomart(cityId=cityId, cateId=cate,k=k)
+   
+    return {
+        "quantity": responses
+    }
+
 # Liệt kê rating theo danh mục sản phẩm trong thành phố của shopee
 @app.get("/get-list-shop-by-categories-city-shopee/{cityId}/{cate}/{k}")
 def list_shop_by_categories_shopee(cityId : str="",cate:str="",k : int=""):
-    responses = query_mongodb.list_rating_by_categories_in_city(cityId=cityId, cateId=cate,k=k)
+    responses = query_mongodb.list_rating_by_categories_of_shopee(cityId=cityId, cateId=cate,k=k)
    
     return {
         "quantity": responses
@@ -155,12 +164,20 @@ def list_shop_by_categories_shopee(cityId : str="",cate:str="",k : int=""):
 # API liệt kê số lượt quan tâm theo danh mục sản phẩm trong thành phố (shopeefood)
 @app.get("/sum-total-review-by-categories-city-shopee")
 def sum_review_by_categories_shopee(cityId : int=""):
-    responses = query_mongodb.sum_total_review_by_categories_in_city(cityId=cityId,cateId="")
+    responses = query_mongodb.sum_total_review_by_categories_in_city_shopee(cityId=cityId,cateId="")
    
     return {
         "quantity": responses
     }
 
+# API liệt kê số lượt quan tâm theo danh mục sản phẩm trong thành phố (Lomart)
+@app.get("/sum-total-review-by-categories-city-lomart")
+def sum_review_by_categories_lomart(cityId : int=""):
+    responses = query_mongodb.sum_total_review_by_categories_in_city_lomart(cityId=cityId,cateId="")
+   
+    return {
+        "quantity": responses
+    }
 
 
 @app.get("/monitor-crawler-system") 

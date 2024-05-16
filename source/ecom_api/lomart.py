@@ -86,8 +86,8 @@ def call_api_get_info_shop_use_threading(collection_name,max_workers=5):
         futures = []
 
         for city in cities:
-            if city["city"]["id"] == 50:
-                continue
+            # if city["city"]["id"] == 50:
+            #     continue
             print("City Id: ", city["city"]["id"], " - City Name: ", city["city"]["name"])
             try:
                 categories = get_categories(cityId=city["city"]["id"])
@@ -213,7 +213,7 @@ def call_api_get_info_shop(collection_name):
 
 
 if __name__ == "__main__":
-    call_api_get_info_shop_use_threading("lomart_shop_v2",4)
+    call_api_get_info_shop_use_threading("lomart_shop_v2",2)
     # call_api_get_info_shop("lomart_shop_v1")
     pass
 

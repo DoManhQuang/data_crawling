@@ -8,7 +8,7 @@ def get_database():
         client = MongoClient(CONNECTION_STRING)
         # Create the database for our example (we will use the same database throughout the tutorial
         # return client['CrawlData']
-        return client['data_crawl_1']
+        return client['datn']
     except:
         return -1
 
