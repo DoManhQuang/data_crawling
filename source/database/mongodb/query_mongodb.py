@@ -254,30 +254,127 @@ def info_basic(city, limit_value = 5, page_value = 0):
         
     return responses
 
-def count_shopee(location_url:str = ""):
+def count_shopee(city_id:str = ""):
     mycol = dbname[shopee_food_db]
     count = 0
-    url_local = {}
-    
-    if not location_url.isspace():
-        url_local = {"location_url": location_url}
-        
-    count = mycol.count_documents(url_local)
+    id_city = {}
+    if not city_id.isspace():
+        id_city = {"city_id": int(city_id)}
+    print("id city: ", id_city)    
+    count = mycol.count_documents(id_city)
+    print(id_city)
     return count
 
-def count_lomart(category: str = ""):
+def count_lomart(city_id: str = ""):
     mycol = dbname[lormart]
     count = 0
-    name_category = {}
-    
-    if not category.isspace():
-        name_category = {"category_info.slug": category}
-    
-    count = mycol.count_documents(name_category)
+    id_city = {}
+    print("city id: ", city_id)
+    if not city_id.isspace():
+        id_city = {"info_shop.cityId": int(city_id)}
+    print("id_city ", id_city)
+    count = mycol.count_documents(id_city)
+    print(id_city)
     return count
+
+def count_shop_by_categorie_lomart(cityId:str="", cateId:str=""):
+    mycol = dbname[lormart]
+    document_count = 0
+    query = {}
+    if cateId != "":
+        query["category_info.id"] = cateId
+        print(cateId)
+    if cityId != "":
+        query["info_shop.cityId"] = cityId
+        print(cityId)
+    document_count = mycol.count_documents(query)
+    return document_count   
+
+def count_shop_by_categorie_shopee(cityId:str="", cate:str=""):
+    mycol = dbname[shopee_food_db]
+    document_count = 0
+    query = {}
+    if cate != "":
+        query["categories"] = cate
+        print(cate)
+    if cityId != "":
+        query["city_id"] = cityId
+        print(cityId)
+    document_count = mycol.count_documents(query)
+    return document_count 
+
+# Liệt kê rating theo danh mục sản phẩm trong thành phố của shopee
+
+def list_rating_by_categories_in_city(cityId:str="", cateId:str="",k=5):
+    mycol = dbname[shopee_food_db]
+    sort_rating ={"rating.avg": -1}
+    query = {}
+    if cateId != "":
+        query["categories"] = cateId
+    if cityId != "":
+        query["city_id"] =  257
+
+    output_info = mycol.find(query).sort(sort_rating)
+    output_info = list(output_info)
+    # responses=[]
+    # responses.append(output_info)
+    # return output_info
+    responses = []
+    i = 0
+    # Duyệt mảng lấy được từ db
+    for product in output_info:
+        i += 1
+        print (product)
+        # Với mỗi dữ liệu lấy được, thêm vào biến responses dưới dạng json
+        responses.append( {
+            "id" : str(product["_id"]), 
+            "address": str(product['address']),
+            "image_name" : str(product['image_name']),
+            "rating" : str(product["rating"]["avg"]),
+            "local" : str(product["location_url"]),
+            "url" : str(product["url"]),
+            "name" : str(product["name"]),
+            "phones" : str(product["phones"])
+            })
+        if i == k:
+            break
+    return responses
+
+# - API liệt kê số lượt quan tâm theo danh mục sản phẩm trong thành phố (shopeefood)
+def sum_total_review_by_categories_in_city(cityId:str="", cateId:str="",):
     
+    mycol = dbname[shopee_food_db]
+    query = {}
+    if cateId != "":
+        query["categories"] = cateId
+    if cityId != "":
+        query["city_id"] =  257
+    # output_info = mycol.find(query,{})
+    # return output_info
+    pineline = [
+        {
+            "$match": {
+                "$and":[
+                    {"city_id":cityId},
+                    {"categories":cateId}
+                ]                
+            }
+        },
+        {
+            "$group":{
+                "_id":None,
+                "total":{
+                    "$sum":"$rating.total_review"
+                }
+            }
+        }
+    ]
+    result = mycol.aggregate(pineline)
+    total = next(result)["total"]
+    print("SUM: ", total)
+    return total
 
 if __name__ == "__main__":   
     # code here
-     
+    # count_shop_by_categorie_lomart(1,1086)
     pass
