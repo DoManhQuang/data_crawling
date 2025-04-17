@@ -21,6 +21,8 @@ pip install -r requirements.txt
 ```
 
 ## Hội nghị
+DOI: [End-to-End System For Data Crawling, Monitoring, And Analyzation
+Of E-Commerce Websites](https://link.springer.com/chapter/10.1007/978-3-031-80943-9_107)
 
 ```
 Paper: End-to-End System For Data Crawling, Monitoring, And Analyzation
@@ -30,5 +32,3 @@ Quynh Nguyen, Ba Nghien Nguyen, Van Tinh Nguyen and Ngoc Anh
 Nguyen
 ```
 
-<a class="none" href="http://icta.hvu.edu.vn/wp-content/uploads/2024/10/ICTA2024_-Tentative-Program_web-2.pdf">
-							<img decoding="async" width="749" height="708" src="https://icta.hvu.edu.vn/wp-content/uploads/2024/10/chuong-trinh-hoi-nghi.jpg" class="attachment-large size-large wp-image-7931" alt="" srcset="https://icta.hvu.edu.vn/wp-content/uploads/2024/10/chuong-trinh-hoi-nghi.jpg 749w, https://icta.hvu.edu.vn/wp-content/uploads/2024/10/chuong-trinh-hoi-nghi-300x284.jpg 300w" sizes="(max-width: 749px) 100vw, 749px">								</a>
